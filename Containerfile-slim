@@ -1,0 +1,31 @@
+# https://github.com/awesome-containers/static-bash
+ARG STATIC_BASH_VERSION=5.2.15
+ARG STATIC_BASH_IMAGE=ghcr.io/awesome-containers/static-bash
+
+# https://github.com/awesome-containers/static-diffutils
+ARG STATIC_DIFFUTILS_VERSION=3.8
+ARG STATIC_DIFFUTILS_IMAGE=ghcr.io/awesome-containers/static-diffutils
+
+# https://github.com/awesome-containers/alpine-build-essential
+ARG BUILD_ESSENTIAL_VERSION=3.17
+ARG BUILD_ESSENTIAL_IMAGE=ghcr.io/awesome-containers/alpine-build-essential
+
+
+FROM $STATIC_BASH_IMAGE:$STATIC_BASH_VERSION-slim AS static-bash
+FROM $STATIC_DIFFUTILS_IMAGE:$STATIC_DIFFUTILS_VERSION AS static-diffutils
+FROM $BUILD_ESSENTIAL_IMAGE:$BUILD_ESSENTIAL_VERSION AS build
+
+WORKDIR /src/diffutils
+COPY --from=static-diffutils /bin/diff /bin/diff3 /bin/sdiff /bin/cmp ./
+
+RUN set -xeu; \
+    upx --no-progress --no-color ./*; \
+    upx -t --no-progress --no-color ./*; \
+    chmod -cR 755 ./*; \
+    chown -cR 0:0 ./*; \
+    ! ldd diff && :; \
+    ./diff --version
+
+# slim static diffutils image
+FROM static-bash
+COPY --from=build /src/diffutils/ /bin/
