@@ -1,5 +1,12 @@
 # Statically linked Diffutils
 
+Provided tools:
+
+* `diff`
+* `diff3`
+* `sdiff`
+* `cmp`
+
 Statically linked [Diffutils] container image with [Bash]
 
 > 2,2M (1,1M bash)
